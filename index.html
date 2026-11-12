@@ -2,104 +2,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Camping Live Scoreboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Camping Live Scoreboard</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      padding: 30px;
-      font-family: Arial, sans-serif;
-      background: #101827;
-      color: white;
-    }
+body {
+  margin: 0;
+  padding: 30px 18px;
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: white;
+}
 
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
 
-    header h1 {
-      color: #f5c542;
-      margin-bottom: 8px;
-    }
+header h1 {
+  color: #f5c542;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
 
-    .subtitle {
-      color: #aab4c5;
-    }
+.subtitle {
+  color: #aab4c5;
+}
 
-    .scoreboard {
-      max-width: 850px;
-      margin: auto;
-    }
+.scoreboard {
+  max-width: 850px;
+  margin: auto;
+}
 
-    .team {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #1e293b;
-      padding: 18px 22px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-    }
+.team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e293b;
+  padding: 18px 22px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+}
 
-    .rank {
-      color: #f5c542;
-      font-weight: bold;
-      margin-right: 15px;
-    }
+.rank {
+  color: #f5c542;
+  font-weight: bold;
+  margin-right: 15px;
+}
 
-    .points {
-      font-size: 22px;
-      font-weight: bold;
-      color: #f5c542;
-    }
+.points {
+  font-size: 22px;
+  font-weight: bold;
+  color: #f5c542;
+}
 
-    @media (max-width: 600px) {
-      body {
-        padding: 15px;
-      }
-    }
-  </style>
+.status {
+  text-align: center;
+  color: #aab4c5;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 20px 12px;
+  }
+
+  .team {
+    padding: 16px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    <h1>CAMPING LIVE SCOREBOARD</h1>
-    <div class="subtitle">12 Competing Teams</div>
-  </header>
+<header>
+  <h1>CAMPING LIVE SCOREBOARD</h1>
+  <div class="subtitle">12 Competing Teams</div>
+</header>
 
-  <main class="scoreboard" id="scoreboard"></main>
+<main class="scoreboard" id="scoreboard">
+  <p class="status">Loading scores...</p>
+</main>
 
-  <script>
-    const teams = Array.from({ length: 12 }, (_, i) => ({
-      name: `Team ${i + 1}`,
-      score: 0
-    }));
+<div class="status" id="status">Connecting to database...</div>
 
-    function displayScores() {
-      const sorted = [...teams].sort((a, b) => b.score - a.score);
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxwtMebzH1I3C_OLdGZbs04SIzckV3gMe4Ni0S_Bs0QfQrDhXs8GTt2iXInZSqtA-TG/exec";
 
-      document.getElementById("scoreboard").innerHTML =
-        sorted.map((team, index) => `
-          <div class="team">
-            <div>
-              <span class="rank">#${index + 1}</span>
-              <strong>${team.name}</strong>
-            </div>
-            <span class="points">${team.score} pts</span>
-          </div>
-        `).join("");
+function loadScores() {
+  const callbackName =
+    "scoreCallback_" + Date.now();
+
+  const script = document.createElement("script");
+
+  window[callbackName] = function(data) {
+    if (data.success) {
+      displayScores(data.teams);
+
+      document.getElementById("status").textContent =
+        "LIVE • Last updated: " +
+        new Date().toLocaleTimeString();
+    } else {
+      document.getElementById("status").textContent =
+        "Database error: " + data.error;
     }
 
-    displayScores();
-  </script>
+    delete window[callbackName];
+    script.remove();
+  };
+
+  script.onerror = function() {
+    document.getElementById("status").textContent =
+      "Unable to connect. Please try again.";
+    delete window[callbackName];
+    script.remove();
+  };
+
+  script.src =
+    API_URL + "?callback=" + callbackName +
+    "&t=" + Date.now();
+
+  document.body.appendChild(script);
+}
+
+function displayScores(teams) {
+  const activeTeams = teams
+    .filter(team => team.status.toLowerCase() === "active")
+    .sort((a, b) => b.score - a.score);
+
+  document.getElementById("scoreboard").innerHTML =
+    activeTeams.map((team, index) => `
+      <div class="team">
+        <div>
+          <span class="rank">#${index + 1}</span>
+          <strong>${escapeHTML(team.name)}</strong>
+        </div>
+        <span class="points">
+          ${Number(team.score).toLocaleString()} pts
+        </span>
+      </div>
+    `).join("");
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
+
+loadScores();
+
+// Refresh every 10 seconds
+setInterval(loadScores, 10000);
+</script>
 
 </body>
 </html>
