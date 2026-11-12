@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Camping Live Scoreboard</title>
 
 <style>
@@ -13,7 +14,7 @@
 
 body {
   margin: 0;
-  padding: 30px 18px;
+  padding: 35px 20px;
   font-family: Arial, sans-serif;
   background: #101827;
   color: white;
@@ -21,17 +22,19 @@ body {
 
 header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 35px;
 }
 
 header h1 {
   color: #f5c542;
+  font-size: clamp(25px, 5vw, 38px);
   margin-bottom: 8px;
   letter-spacing: 1px;
 }
 
 .subtitle {
   color: #aab4c5;
+  font-size: 16px;
 }
 
 .scoreboard {
@@ -44,37 +47,74 @@ header h1 {
   justify-content: space-between;
   align-items: center;
   background: #1e293b;
-  padding: 18px 22px;
+  padding: 20px 24px;
   margin-bottom: 12px;
   border-radius: 10px;
+  border: 1px solid #29364b;
+  transition: background 0.2s;
+}
+
+.team:first-child {
+  border: 1px solid #f5c542;
+  background: #263348;
+}
+
+.team-info {
+  display: flex;
+  align-items: center;
 }
 
 .rank {
   color: #f5c542;
   font-weight: bold;
-  margin-right: 15px;
+  font-size: 17px;
+  min-width: 40px;
+}
+
+.team-name {
+  font-size: 17px;
+  font-weight: bold;
 }
 
 .points {
-  font-size: 22px;
+  font-size: 21px;
   font-weight: bold;
   color: #f5c542;
+  white-space: nowrap;
 }
 
 .status {
   text-align: center;
   color: #aab4c5;
-  margin-top: 20px;
+  margin-top: 25px;
   font-size: 13px;
+}
+
+.loading {
+  text-align: center;
+  color: #aab4c5;
+  padding: 35px;
+}
+
+.error {
+  color: #ff7777;
 }
 
 @media (max-width: 600px) {
   body {
-    padding: 20px 12px;
+    padding: 25px 12px;
   }
 
   .team {
-    padding: 16px;
+    padding: 17px 14px;
+  }
+
+  .team-name {
+    font-size: 15px;
+  }
+
+  .points {
+    font-size: 18px;
   }
 }
 </style>
@@ -88,30 +128,71 @@ header h1 {
 </header>
 
 <main class="scoreboard" id="scoreboard">
-  <p class="status">Loading scores...</p>
+  <div class="loading">Loading scoreboard...</div>
 </main>
 
-<div class="status" id="status">Connecting to database...</div>
+<div class="status" id="status">
+  Connecting to database...
+</div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxwtMebzH1I3C_OLdGZbs04SIzckV3gMe4Ni0S_Bs0QfQrDhXs8GTt2iXInZSqtA-TG/exec";
 
+// GOOGLE APPS SCRIPT DATABASE URL
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxwtMebzH1I3C_OLdGZbs04SIzckV3gMe4Ni0S_Bs0QfQrDhXs8GTt2iXInZSqtA-TG/exec";
+
+// LOAD SCORES
 function loadScores() {
+
   const callbackName =
-    "scoreCallback_" + Date.now();
+    "scoreCallback_" + Date.now() + "_" +
+    Math.random().toString(36).slice(2);
 
   const script = document.createElement("script");
 
+  let finished = false;
+
+  const timeout = setTimeout(() => {
+    if (finished) return;
+
+    finished = true;
+
+    document.getElementById("status").textContent =
+      "Connection timed out. Retrying...";
+
+    document.getElementById("status").classList.add("error");
+
+    delete window[callbackName];
+    script.remove();
+
+  }, 15000);
+
   window[callbackName] = function(data) {
-    if (data.success) {
+
+    if (finished) return;
+
+    finished = true;
+    clearTimeout(timeout);
+
+    if (data && data.success && Array.isArray(data.teams)) {
+
       displayScores(data.teams);
 
+      const now = new Date().toLocaleTimeString();
+
       document.getElementById("status").textContent =
-        "LIVE • Last updated: " +
-        new Date().toLocaleTimeString();
+        "LIVE • Last updated: " + now;
+
+      document.getElementById("status").classList.remove("error");
+
     } else {
+
       document.getElementById("status").textContent =
-        "Database error: " + data.error;
+        "Database error: " +
+        (data.error || "Invalid response");
+
+      document.getElementById("status").classList.add("error");
+
     }
 
     delete window[callbackName];
@@ -119,39 +200,71 @@ function loadScores() {
   };
 
   script.onerror = function() {
+
+    if (finished) return;
+
+    finished = true;
+    clearTimeout(timeout);
+
     document.getElementById("status").textContent =
-      "Unable to connect. Please try again.";
+      "Unable to connect. Retrying...";
+
+    document.getElementById("status").classList.add("error");
+
     delete window[callbackName];
     script.remove();
   };
 
   script.src =
-    API_URL + "?callback=" + callbackName +
+    API_URL +
+    "?callback=" + callbackName +
     "&t=" + Date.now();
 
   document.body.appendChild(script);
 }
 
+// DISPLAY TEAM RANKINGS
 function displayScores(teams) {
-  const activeTeams = teams
-    .filter(team => team.status.toLowerCase() === "active")
-    .sort((a, b) => b.score - a.score);
 
-  document.getElementById("scoreboard").innerHTML =
-    activeTeams.map((team, index) => `
+  const activeTeams = teams
+    .filter(team =>
+      String(team.status).trim().toLowerCase() !== "inactive"
+    )
+    .sort((a, b) => Number(b.score) - Number(a.score));
+
+  const scoreboard = document.getElementById("scoreboard");
+
+  if (activeTeams.length === 0) {
+    scoreboard.innerHTML =
+      '<div class="loading">No active teams found.</div>';
+    return;
+  }
+
+  scoreboard.innerHTML = activeTeams.map((team, index) => {
+
+    const name = escapeHTML(team.name || "Unnamed Team");
+
+    const score = Number(team.score) || 0;
+
+    return `
       <div class="team">
-        <div>
+        <div class="team-info">
           <span class="rank">#${index + 1}</span>
-          <strong>${escapeHTML(team.name)}</strong>
+          <span class="team-name">${name}</span>
         </div>
+
         <span class="points">
-          ${Number(team.score).toLocaleString()} pts
+          ${score.toLocaleString()} pts
         </span>
       </div>
-    `).join("");
+    `;
+
+  }).join("");
 }
 
+// PREVENT HTML INJECTION
 function escapeHTML(value) {
+
   return String(value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
     "<": "&lt;",
@@ -159,12 +272,15 @@ function escapeHTML(value) {
     '"': "&quot;",
     "'": "&#039;"
   })[char]);
+
 }
 
+// INITIAL LOAD
 loadScores();
 
-// Refresh every 10 seconds
+// AUTOMATIC REFRESH EVERY 10 SECONDS
 setInterval(loadScores, 10000);
+
 </script>
 
 </body>
