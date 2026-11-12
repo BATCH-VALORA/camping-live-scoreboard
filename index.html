@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camping Live Scoreboard</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: Arial, sans-serif;
+      background: #101827;
+      color: white;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: #f5c542;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #aab4c5;
+    }
+
+    .scoreboard {
+      max-width: 850px;
+      margin: auto;
+    }
+
+    .team {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e293b;
+      padding: 18px 22px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+    }
+
+    .rank {
+      color: #f5c542;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+
+    .points {
+      font-size: 22px;
+      font-weight: bold;
+      color: #f5c542;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>CAMPING LIVE SCOREBOARD</h1>
+    <div class="subtitle">12 Competing Teams</div>
+  </header>
+
+  <main class="scoreboard" id="scoreboard"></main>
+
+  <script>
+    const teams = Array.from({ length: 12 }, (_, i) => ({
+      name: `Team ${i + 1}`,
+      score: 0
+    }));
+
+    function displayScores() {
+      const sorted = [...teams].sort((a, b) => b.score - a.score);
+
+      document.getElementById("scoreboard").innerHTML =
+        sorted.map((team, index) => `
+          <div class="team">
+            <div>
+              <span class="rank">#${index + 1}</span>
+              <strong>${team.name}</strong>
+            </div>
+            <span class="points">${team.score} pts</span>
+          </div>
+        `).join("");
+    }
+
+    displayScores();
+  </script>
+
+</body>
+</html>
