@@ -5,116 +5,260 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Camping Live Scoreboard</title>
+<title>Batch Valora | Live Scoreboard</title>
 
 <style>
+:root {
+  --red: #EF4444;
+  --deep-red: #B92F38;
+  --gold: #F9C443;
+  --cream: #FFF8EE;
+  --brown: #482C2C;
+  --muted: #8D7770;
+  --white: #FFFFFF;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  padding: 35px 20px;
-  font-family: Arial, sans-serif;
-  background: #101827;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--brown);
+}
+
+/* HEADER */
+
+.header {
+  background: linear-gradient(135deg, #EF4444, #B92F38);
   color: white;
-}
-
-header {
   text-align: center;
-  margin-bottom: 35px;
+  padding: 48px 20px 42px;
+  border-bottom: 7px solid var(--gold);
 }
 
-header h1 {
-  color: #f5c542;
-  font-size: clamp(25px, 5vw, 38px);
-  margin-bottom: 8px;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  color: #aab4c5;
-  font-size: 16px;
-}
-
-.scoreboard {
-  max-width: 850px;
-  margin: auto;
-}
-
-.team {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #1e293b;
-  padding: 20px 24px;
+.brand {
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 5px;
+  color: #FFE6A3;
   margin-bottom: 12px;
-  border-radius: 10px;
-  border: 1px solid #29364b;
-  transition: background 0.2s;
 }
 
-.team:first-child {
-  border: 1px solid #f5c542;
-  background: #263348;
+.header h1 {
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  margin: 0;
 }
 
-.team-info {
+.header p {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: #FFE7E0;
+}
+
+/* STATUS */
+
+.status-wrapper {
   display: flex;
-  align-items: center;
-}
-
-.rank {
-  color: #f5c542;
-  font-weight: bold;
-  font-size: 17px;
-  min-width: 40px;
-}
-
-.team-name {
-  font-size: 17px;
-  font-weight: bold;
-}
-
-.points {
-  font-size: 21px;
-  font-weight: bold;
-  color: #f5c542;
-  white-space: nowrap;
+  justify-content: center;
+  margin: 25px auto;
 }
 
 .status {
-  text-align: center;
-  color: #aab4c5;
-  margin-top: 25px;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: white;
+  color: #27794B;
+  padding: 9px 17px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 3px 12px #482C2C12;
 }
 
-.loading {
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #35B66A;
+  border-radius: 50%;
+}
+
+/* MAIN */
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 20px 50px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 10px;
+}
+
+.section-heading h2 {
+  font-size: 20px;
+  margin: 0;
+  color: var(--deep-red);
+}
+
+.team-count {
+  background: #FFE6C4;
+  color: var(--deep-red);
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* TEAM CARDS */
+
+.team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border: 1px solid #F2D9D3;
+  border-radius: 12px;
+  padding: 20px 23px;
+  margin-bottom: 12px;
+  box-shadow: 0 3px 10px #482C2C09;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.team:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px #482C2C15;
+}
+
+.team-left {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  min-width: 0;
+}
+
+.rank {
+  min-width: 38px;
+  height: 38px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background: #FFF0E8;
+  color: var(--deep-red);
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.team-name {
+  font-weight: bold;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.points {
+  color: var(--deep-red);
+  font-size: 21px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* TOP THREE */
+
+.team.first {
+  border: 2px solid var(--gold);
+  background: #FFFDF5;
+}
+
+.team.first .rank {
+  background: var(--gold);
+  color: #62430A;
+}
+
+.team.second .rank {
+  background: #E8E8E8;
+  color: #555555;
+}
+
+.team.third .rank {
+  background: #F4D0B4;
+  color: #884A26;
+}
+
+/* LOADING AND ERROR */
+
+.message {
   text-align: center;
-  color: #aab4c5;
-  padding: 35px;
+  padding: 35px 15px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .error {
-  color: #ff7777;
+  color: var(--deep-red);
 }
 
-@media (max-width: 600px) {
-  body {
-    padding: 25px 12px;
+/* FOOTER */
+
+.footer {
+  text-align: center;
+  padding: 25px 15px;
+  background: #FCE9DE;
+  border-top: 1px solid #F2D9D3;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.footer strong {
+  color: var(--deep-red);
+  letter-spacing: 2px;
+}
+
+/* MOBILE */
+
+@media(max-width: 600px) {
+
+  .header {
+    padding: 38px 15px;
+  }
+
+  .brand {
+    letter-spacing: 3px;
+  }
+
+  .container {
+    padding: 8px 13px 35px;
   }
 
   .team {
-    padding: 17px 14px;
+    padding: 16px 13px;
+  }
+
+  .team-left {
+    gap: 11px;
+  }
+
+  .rank {
+    min-width: 33px;
+    height: 33px;
+    font-size: 13px;
   }
 
   .team-name {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .points {
-    font-size: 18px;
+    font-size: 17px;
   }
 }
 </style>
@@ -122,26 +266,72 @@ header h1 {
 
 <body>
 
-<header>
-  <h1>CAMPING LIVE SCOREBOARD</h1>
-  <div class="subtitle">12 Competing Teams</div>
+<!-- HEADER -->
+
+<header class="header">
+
+  <div class="brand">BATCH VALORA</div>
+
+  <h1>LIVE SCOREBOARD</h1>
+
+  <p>Strength • Strategy • Excellence</p>
+
 </header>
 
-<main class="scoreboard" id="scoreboard">
-  <div class="loading">Loading scoreboard...</div>
+<!-- LIVE STATUS -->
+
+<div class="status-wrapper">
+  <div class="status" id="status">
+    <span class="status-dot"></span>
+    <span id="statusText">CONNECTING...</span>
+  </div>
+</div>
+
+<!-- SCOREBOARD -->
+
+<main class="container">
+
+  <div class="section-heading">
+
+    <h2>Team Rankings</h2>
+
+    <div class="team-count" id="teamCount">
+      12 TEAMS
+    </div>
+
+  </div>
+
+  <div id="scoreboard">
+
+    <div class="message">
+      Loading team rankings...
+    </div>
+
+  </div>
+
 </main>
 
-<div class="status" id="status">
-  Connecting to database...
-</div>
+<!-- FOOTER -->
+
+<footer class="footer">
+
+  <strong>VALORA</strong>
+
+  <p>Camping Competition • Official Scoreboard</p>
+
+  <p>Scores automatically synchronized</p>
+
+</footer>
 
 <script>
 
-// GOOGLE APPS SCRIPT DATABASE URL
+// DATABASE CONNECTION
+
 const API_URL =
 "https://script.google.com/macros/s/AKfycbxwtMebzH1I3C_OLdGZbs04SIzckV3gMe4Ni0S_Bs0QfQrDhXs8GTt2iXInZSqtA-TG/exec";
 
-// LOAD SCORES
+// LOAD DATABASE
+
 function loadScores() {
 
   const callbackName =
@@ -153,14 +343,12 @@ function loadScores() {
   let finished = false;
 
   const timeout = setTimeout(() => {
+
     if (finished) return;
 
     finished = true;
 
-    document.getElementById("status").textContent =
-      "Connection timed out. Retrying...";
-
-    document.getElementById("status").classList.add("error");
+    updateStatus("CONNECTION TIMEOUT", true);
 
     delete window[callbackName];
     script.remove();
@@ -174,29 +362,26 @@ function loadScores() {
     finished = true;
     clearTimeout(timeout);
 
-    if (data && data.success && Array.isArray(data.teams)) {
+    if (data && data.success &&
+        Array.isArray(data.teams)) {
 
       displayScores(data.teams);
 
-      const now = new Date().toLocaleTimeString();
-
-      document.getElementById("status").textContent =
-        "LIVE • Last updated: " + now;
-
-      document.getElementById("status").classList.remove("error");
+      updateStatus(
+        "LIVE • UPDATED " +
+        new Date().toLocaleTimeString(),
+        false
+      );
 
     } else {
 
-      document.getElementById("status").textContent =
-        "Database error: " +
-        (data.error || "Invalid response");
-
-      document.getElementById("status").classList.add("error");
+      updateStatus("DATABASE ERROR", true);
 
     }
 
     delete window[callbackName];
     script.remove();
+
   };
 
   script.onerror = function() {
@@ -206,13 +391,11 @@ function loadScores() {
     finished = true;
     clearTimeout(timeout);
 
-    document.getElementById("status").textContent =
-      "Unable to connect. Retrying...";
-
-    document.getElementById("status").classList.add("error");
+    updateStatus("CONNECTION ERROR", true);
 
     delete window[callbackName];
     script.remove();
+
   };
 
   script.src =
@@ -223,62 +406,110 @@ function loadScores() {
   document.body.appendChild(script);
 }
 
-// DISPLAY TEAM RANKINGS
+// DISPLAY SCORES
+
 function displayScores(teams) {
 
   const activeTeams = teams
+
     .filter(team =>
       String(team.status).trim().toLowerCase() !== "inactive"
     )
-    .sort((a, b) => Number(b.score) - Number(a.score));
 
-  const scoreboard = document.getElementById("scoreboard");
+    .sort((a, b) =>
+      Number(b.score) - Number(a.score)
+    );
+
+  document.getElementById("teamCount").textContent =
+    activeTeams.length + " TEAMS";
+
+  const scoreboard =
+    document.getElementById("scoreboard");
 
   if (activeTeams.length === 0) {
+
     scoreboard.innerHTML =
-      '<div class="loading">No active teams found.</div>';
+      '<div class="message">No active teams found.</div>';
+
     return;
   }
 
   scoreboard.innerHTML = activeTeams.map((team, index) => {
+
+    let position = "";
+
+    if (index === 0) position = "first";
+    if (index === 1) position = "second";
+    if (index === 2) position = "third";
 
     const name = escapeHTML(team.name || "Unnamed Team");
 
     const score = Number(team.score) || 0;
 
     return `
-      <div class="team">
-        <div class="team-info">
-          <span class="rank">#${index + 1}</span>
-          <span class="team-name">${name}</span>
+
+      <div class="team ${position}">
+
+        <div class="team-left">
+
+          <div class="rank">
+            #${index + 1}
+          </div>
+
+          <div class="team-name">
+            ${name}
+          </div>
+
         </div>
 
-        <span class="points">
+        <div class="points">
           ${score.toLocaleString()} pts
-        </span>
+        </div>
+
       </div>
+
     `;
 
   }).join("");
+
 }
 
-// PREVENT HTML INJECTION
+// UPDATE STATUS
+
+function updateStatus(message, isError) {
+
+  document.getElementById("statusText").textContent =
+    message;
+
+  document.getElementById("status").classList.toggle(
+    "error",
+    isError
+  );
+
+}
+
+// PROTECT HTML
+
 function escapeHTML(value) {
 
   return String(value).replace(/[&<>"']/g, char => ({
+
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
     "'": "&#039;"
+
   })[char]);
 
 }
 
 // INITIAL LOAD
+
 loadScores();
 
 // AUTOMATIC REFRESH EVERY 10 SECONDS
+
 setInterval(loadScores, 10000);
 
 </script>
