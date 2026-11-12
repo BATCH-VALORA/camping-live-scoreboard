@@ -38,7 +38,13 @@ body {
   padding: 48px 20px 42px;
   border-bottom: 7px solid var(--gold);
 }
-
+.logo {
+  display: block;
+  width: min(420px, 90%);
+  height: auto;
+  margin: 0 auto 20px;
+  object-fit: contain;
+}
 .brand {
   font-size: 13px;
   font-weight: bold;
@@ -270,7 +276,11 @@ body {
 
 <header class="header">
 
-  <div class="brand">BATCH VALORA</div>
+  <img
+    src="Batch%20Valora%20Sword%20Logo.png"
+    alt="Batch Valora Logo"
+    class="logo"
+  >
 
   <h1>LIVE SCOREBOARD</h1>
 
